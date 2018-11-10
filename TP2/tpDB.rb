@@ -43,7 +43,7 @@ module DB_TP2
                        VALUES(:nome, :dt_nasc, :idade, :cpf, :idEmpresa, :salario, :dt_entrada, :setor, :cargo, :nivel)"
 
     stmt.execute( :nome => funcionario.getNome, :dt_nasc => funcionario.getDt_nasc, :idade => funcionario.getIdade, :cpf => funcionario.getCpf,
-                  :idEmpresa => idEmpresa, :salario => funcionario.getSalario, :dt_entrada => funcionario.getDt_entrada, :setor => funcionario.getSetor.getCodigo,
+                  :idEmpresa => idEmpresa, :salario => funcionario.getSalario, :dt_entrada => funcionario.getDt_entrada, :setor => funcionario.getSetor,
                   :cargo => funcionario.getCargo, :nivel => funcionario.getNivel )
     stmt.close
   end
@@ -58,7 +58,7 @@ module DB_TP2
     stmt.bind_param(5,funcionario.getIdEmpresa)
     stmt.bind_param(6,funcionario.getSalario)
     stmt.bind_param(7,funcionario.getDt_entrada)
-    stmt.bind_param(8,funcionario.getSetor.getCodigo)
+    stmt.bind_param(8,funcionario.getSetor)
     stmt.bind_param(9,funcionario.getCargo)
     stmt.bind_param(10,funcionario.getNivel)
     stmt.bind_param(11,cpf)
@@ -133,6 +133,14 @@ module DB_TP2
   #mesmo que definir como self
   module_function :getDB, :closeDB, :insertFuncionario, :updateFuncionario, :deleteFuncionario, :getFuncionariosByNivel, :getAllFuncionarios,
                   :getAllFuncionariosByIdEmpresa, :getFuncionarioById, :getSetorByCargo, :getFuncionariosBySetor, :getEmpresaById
+
+  def self.showTable(tabela)
+    @db.results_as_hash = false
+    puts("\n"+tabela)
+    @db.execute('select * from '+tabela) do |row|
+      puts row.join("\t") + "\n"
+    end
+  end
 
   #utilizado para criar o banco, inicializar tabelas, configuração e popular dados
   def self.create

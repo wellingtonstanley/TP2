@@ -7,19 +7,24 @@ class Profissional
     # mesmo que super(args)
     Funcionario.instance_method(:initialize).bind(self).call(args)
     @nivel = nivel
-
     case nivel
     when 1
+      puts ('nivel ' + nivel.to_s + '@nivel ' + @nivel.to_s)
       @salario = 1500.00
     when 2
+      puts ('nivel ' + nivel.to_s + '@nivel ' + @nivel.to_s)
       @salario = 3000.00
     when 3
+      puts ('nivel ' + nivel.to_s + '@nivel ' + @nivel.to_s)
       @salario = 6500.00
     when 4
+      puts ('nivel ' + nivel.to_s + '@nivel ' + @nivel.to_s)
       @salario = 9500.00
     when 5
+      puts ('nivel ' + nivel.to_s + '@nivel ' + @nivel.to_s)
       @salario = 13000.00
-    else 6
+    else
+      puts ('nivel ' + nivel.to_s + '@nivel ' + @nivel.to_s)
       @salario = 18000.00
     end
 
@@ -64,7 +69,7 @@ end
 
 class Especialista < Profissional
   def initialize(nivel=3, **args)
-    super
+    super(nivel, args)
   end
 end
 

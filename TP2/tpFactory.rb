@@ -30,6 +30,7 @@ class Empresa
 
   def admitirFuncionario(funcionario)
     @funcionarios << funcionario
+    DB_TP2.insertFuncionario(funcionario, @idEmpresa)
   end
 
   def demitirFuncionario(funcionario)
@@ -78,10 +79,3 @@ class Empresa
   end
 
 end
-DB_TP2.getDB
-DB_TP2.create
-empresa = DB_TP2.getEmpresaById(11)
-puts "\nEmpresa Criada \n"
-empresa.to_s
-empresa.calcularTotalVT
-DB_TP2.closeDB
