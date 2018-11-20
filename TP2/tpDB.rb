@@ -7,7 +7,7 @@ require_relative 'tpExperts'
 
 module DB_TP2
   def getDB
-    if @db.nil?
+    if @db.nil? || @db.closed?
       @db = SQLite3::Database.new(':memory:')
     end
     @db
@@ -108,10 +108,12 @@ module DB_TP2
   end
 
   # TODO: metodo tem que ser feito com nomenclatura like
-  def getSetorByCargo(cargo)
-    @db.execute('select * from setor WHERE cargo = ?', cargo) do |row|
-      puts row.join("\t") + "\n"
+  def getSetorById(idSetor)
+    @db.results_as_hash = true
+    @db.execute('select * from setor WHERE codigo = ?', idSetor) do |row|
+      @setorNome = row[1]
     end
+    @setorNome
   end
 
   # seleciona todos os funcionarios de determinado setor
@@ -132,7 +134,7 @@ module DB_TP2
 
   #mesmo que definir como self
   module_function :getDB, :closeDB, :insertFuncionario, :updateFuncionario, :deleteFuncionario, :getFuncionariosByNivel, :getAllFuncionarios,
-                  :getAllFuncionariosByIdEmpresa, :getFuncionarioById, :getSetorByCargo, :getFuncionariosBySetor, :getEmpresaById
+                  :getAllFuncionariosByIdEmpresa, :getFuncionarioById, :getSetorById, :getFuncionariosBySetor, :getEmpresaById
 
   def self.showTable(tabela)
     @db.results_as_hash = false
@@ -157,13 +159,13 @@ module DB_TP2
       stmt = db.prepare "INSERT INTO funcionario(nome,dt_nasc,idade,cpf,idEmpresa,salario,dt_entrada,setor,cargo, nivel)
                          VALUES(:nome, :dt_nasc, :idade, :cpf, :idEmpresa, :salario, :dt_entrada, :setor, :cargo, :nivel)"
 
-      stmt.execute( :nome => 'joao', :dt_nasc => '18/08/2000', :idade => 18, :cpf => '02555516891', :idEmpresa => 11, :salario => 1500.00,
+      stmt.execute( :nome => 'joao', :dt_nasc => '18/08/2000', :idade => 18, :cpf => '025555168-91', :idEmpresa => 11, :salario => 1500.00,
          :dt_entrada => '20/08/2018', :setor => 2, :cargo => 'auxiliar', :nivel => 3 )
-      stmt.execute( :nome => 'pedro', :dt_nasc => '18/08/1992', :idade => 26, :cpf => '02534516891', :idEmpresa => 11, :salario => 3000.00,
+      stmt.execute( :nome => 'pedro', :dt_nasc => '18/08/1992', :idade => 26, :cpf => '025345168-91', :idEmpresa => 11, :salario => 3000.00,
          :dt_entrada => '20/08/2010', :setor => 2, :cargo => 'tecnico', :nivel => 2 )
-      stmt.execute( :nome => 'jose', :dt_nasc => '12/06/1990', :idade => 28, :cpf => '02652302122', :idEmpresa => 11, :salario => 6500.00,
-         :dt_entrada => '20/08/2008', :setor => 2, :cargo => 'contador', :nivel => 3 )
-      stmt.execute( :nome => 'paulo', :dt_nasc => '30/03/1988', :idade => 30, :cpf => '02152302194', :idEmpresa => 11, :salario => 6500.00,
+      stmt.execute( :nome => 'jose', :dt_nasc => '12/06/1990', :idade => 28, :cpf => '026523021-22', :idEmpresa => 11, :salario => 6500.00,
+         :dt_entrada => '20/08/2008', :setor => 1, :cargo => 'contador', :nivel => 3 )
+      stmt.execute( :nome => 'paulo', :dt_nasc => '30/03/1988', :idade => 30, :cpf => '021523021-94', :idEmpresa => 11, :salario => 6500.00,
         :dt_entrada => '20/08/2006', :setor => 2, :cargo => 'administrador', :nivel => 3 )
       stmt.close
 
@@ -175,10 +177,10 @@ module DB_TP2
 
       stmt = db.prepare "INSERT INTO setor(codigo,nome,cargos) VALUES(:codigo, :nome, :cargos)"
       dset1 = ['administrador','contador','economista']
-      dset2 = ['administrador','contador','economista']
-      dset3 = ['engcomputacao','engsistemas','enginformacao']
-      dset4 = ['advogado','comsocial','contador']
-      dset5 = ['dgrafico','dmultimedia','engsocial']
+      dset2 = ['comunicador, administrador, mercadologo']
+      dset3 = ['engenheiro_de_computacao','engenheiro_de_sistemas','engenheiro_de_informacao']
+      dset4 = ['advogado','comunicador','contador']
+      dset5 = ['designer_grafico','designer_multimedia','engenheiro_social']
       stmt.execute(codigo: 1, nome: "financas", cargos: dset1.to_s)
       stmt.execute(codigo: 2, nome: "marketing", cargos: dset2.to_s)
       stmt.execute(codigo: 3, nome: "tecnologia", cargos: dset3.to_s)
@@ -187,15 +189,36 @@ module DB_TP2
       stmt.close
 
       count = db.get_first_value("SELECT count(*) FROM funcionario")
+      colsFuncionario = []
+      db.execute "PRAGMA table_info('funcionario')" do |row|
+        colsFuncionario << row[1]
+      end
       puts "Funcionario - count(*): #{count}"
+      puts "%s \t%s \t%s %10s %-8s \t%s %s \t%s \t%s \t%s" % [colsFuncionario[0], colsFuncionario[1], colsFuncionario[2], colsFuncionario[3],
+       colsFuncionario[4], colsFuncionario[5], colsFuncionario[6], colsFuncionario[7], colsFuncionario[8], colsFuncionario[9]]
+
       db.execute('select * from funcionario') do |row|
         puts row.join("\t") + "\n"
       end
+
+      colsEmpresa = []
+      db.execute "PRAGMA table_info('empresa')" do |row|
+        colsEmpresa << row[1]
+      end
+
       puts "\nEmpresa "
+      puts "%s \t%s " % [colsEmpresa[0], colsEmpresa[1]]
       db.execute('select * from empresa') do |row|
         puts row.join("\t") + "\n"
       end
+
+      colsSetor = []
+      db.execute "PRAGMA table_info('setor')" do |row|
+        colsSetor << row[1]
+      end
+
       puts "\nSetor "
+      puts "%s \t%s \t\t%s " % [colsSetor[0], colsSetor[1], colsSetor[2]]
       db.execute('select * from setor') do |row|
         puts row.join("\t") + "\n"
       end

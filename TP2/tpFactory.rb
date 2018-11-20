@@ -28,12 +28,21 @@ class Empresa
     setFuncionarios
   end
 
+  def getFuncionarios
+    @funcionarios
+  end
+
+  def getSetores
+    @setores
+  end
+
   def admitirFuncionario(funcionario)
     @funcionarios << funcionario
     DB_TP2.insertFuncionario(funcionario, @idEmpresa)
   end
 
   def demitirFuncionario(funcionario)
+    DB_TP2.deleteFuncionario(funcionario.getCpf)
     @funcionarios.delete(funcionario)
   end
 
