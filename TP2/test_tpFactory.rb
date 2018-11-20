@@ -112,7 +112,7 @@ Test::Unit::UI::Console::TestRunner.run(TS_MyTests)
 
 #TRABALHO 2 - IMPORTANDO DE/PARA EMPRESA ESTRANGEIRA
 #caminho do trabalho que esta disponivel em https://github.com/MattLemos/TP2.git
-require_relative '../../TP2Con/TP2/Trab2/src/classesG1/Empresa.rb'
+require_relative 'classes/Empresa.rb'
 
 #TRABALHO 2
 #Classe que trata os casos de teste de transferencia entre empresa
